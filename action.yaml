@@ -1,0 +1,39 @@
+name: 'kubectl installer'
+description: 'Install kubectl to the current runner'
+author: 'tsanghan tsanghan@gmail.com'
+branding:
+  icon: command
+  color: blue
+inputs:
+  version:
+    description: 'The version of kubectl to install'
+    required: false
+    default: '1.31.1'
+runs:
+  using: 'composite'
+  steps:
+    - name: Cache kubectl
+      id: cache-kubectl
+      uses: actions/cache@v3
+      with:
+        path: ~/.local/bin/kubectl
+        key: ${{ inputs.version }}
+        restore-keys: |
+          kubectl-
+
+    - name: Install kubectl
+      shell: bash
+      if: steps.cache-kubectl.outputs.cache-hit != 'true'
+      run: |
+        test -d ~/.local/bin || mkdir -p ~/.local/bin
+        curl -L "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" -o ~/.local/bin/kubectl
+        chmod +x ~/.local/bin/kubectl
+
+    - name: Add kubectl to PATH
+      shell: bash
+      run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Print installed kubectl version
+      shell: bash
+      run: |
+        kubectl version --client -o yaml
