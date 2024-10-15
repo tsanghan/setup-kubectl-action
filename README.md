@@ -19,7 +19,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install yq
+      - name: Install kubectl
         uses: tsanghan/setup-kubectl-action@main
         with:
           version: '1.31.1'
